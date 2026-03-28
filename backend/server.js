@@ -6,10 +6,20 @@ dotenv.config();
 
 const app = express();
 
-const corsOrigins = process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean)
-    : true;
-app.use(cors({ origin: corsOrigins }));
+// Comma-separated list, e.g. https://webprojectjobra.netlify.app
+// If set but parses to an empty list, fall back to reflecting all (same as unset) to avoid locking out every origin.
+let corsOrigins = true;
+if (process.env.CORS_ORIGIN) {
+    const list = process.env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean);
+    corsOrigins = list.length ? list : true;
+}
+app.use(
+    cors({
+        origin: corsOrigins,
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+    })
+);
 app.use(express.json());
 
 // Test Route
@@ -39,6 +49,6 @@ app.use('/api/appointment', appointmentRoutes);
 app.use('/api/report', reportRoutes);
 app.use('/api/complaint', complaintRoutes);
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });

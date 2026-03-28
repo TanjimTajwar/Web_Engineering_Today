@@ -8,6 +8,12 @@ const connectionUrl =
     process.env.DATABASE_URL ||
     process.env.MYSQL_PUBLIC_URL;
 
+if (connectionUrl && !/^mysql:\/\//i.test(connectionUrl)) {
+    console.error(
+        'Expected a mysql:// URL (MYSQL_URL from Railway MySQL). DATABASE_URL may point to another engine; unset it or use MYSQL_URL only.'
+    );
+}
+
 const db = connectionUrl
     ? mysql.createConnection(connectionUrl)
     : mysql.createConnection({

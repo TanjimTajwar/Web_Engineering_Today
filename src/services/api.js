@@ -34,7 +34,8 @@ API.interceptors.request.use((req) => {
         if (raw) {
             const user = JSON.parse(raw);
             if (user?.token) {
-                req.headers.Authorization = user.token;
+                const t = String(user.token).trim();
+                req.headers.Authorization = /^bearer\s+/i.test(t) ? t : `Bearer ${t}`;
             }
         }
     } catch {

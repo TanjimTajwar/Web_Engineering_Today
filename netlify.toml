@@ -2,10 +2,15 @@
 #   REACT_APP_API_URL = https://webengineeringtoday-production.up.railway.app/api
 # or (host only is OK):
 #   REACT_APP_BACKEND_URL = webengineeringtoday-production.up.railway.app
+#
+# Base directory in Netlify: leave default (repo root) unless this app lives in a subfolder.
 
 [build]
   command = "npm run build"
   publish = "build"
+
+[build.environment]
+  NODE_VERSION = "20"
 
 [[redirects]]
   from = "/*"
