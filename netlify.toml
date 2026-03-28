@@ -1,7 +1,7 @@
 # Build the React app at repo root. Set either:
-#   REACT_APP_API_URL = https://your-service.up.railway.app/api
+#   REACT_APP_API_URL = https://webengineeringtoday-production.up.railway.app/api
 # or (host only is OK):
-#   REACT_APP_BACKEND_URL = your-service.up.railway.app
+#   REACT_APP_BACKEND_URL = webengineeringtoday-production.up.railway.app
 
 [build]
   command = "npm run build"
