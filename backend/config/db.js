@@ -2,15 +2,15 @@ require('dotenv').config();
 
 const mysql = require('mysql2');
 
-// Railway: MYSQL_URL (internal) or DATABASE_URL. Local dev to cloud DB: MYSQL_PUBLIC_URL.
+// Railway: mysql.createConnection(process.env.DATABASE_URL) when DATABASE_URL is set (private MYSQL_URL / public proxy URL).
 const connectionUrl =
-    process.env.MYSQL_URL ||
     process.env.DATABASE_URL ||
+    process.env.MYSQL_URL ||
     process.env.MYSQL_PUBLIC_URL;
 
 if (connectionUrl && !/^mysql:\/\//i.test(connectionUrl)) {
     console.error(
-        'Expected a mysql:// URL (MYSQL_URL from Railway MySQL). DATABASE_URL may point to another engine; unset it or use MYSQL_URL only.'
+        'Expected a mysql:// URL. DATABASE_URL must be MySQL, not postgres:// — fix the variable on Railway.'
     );
 }
 

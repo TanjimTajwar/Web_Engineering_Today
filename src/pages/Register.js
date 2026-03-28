@@ -92,11 +92,12 @@ export default function Register() {
       setSuccess('Account created successfully. Redirecting to login…');
       setTimeout(() => navigate('/'), 1500);
     } catch (err) {
-      const msg = err.response?.data?.message;
-      setError(
-        msg ||
-          (isLikelyNetworkError(err) ? getNetworkErrorHint() : 'Registration failed')
-      );
+      const d = err.response?.data;
+      const detail = d?.error ? ` ${d.error}` : '';
+      const msg =
+        d?.message ||
+        (isLikelyNetworkError(err) ? getNetworkErrorHint() : 'Registration failed');
+      setError(msg + detail);
     } finally {
       setLoading(false);
     }

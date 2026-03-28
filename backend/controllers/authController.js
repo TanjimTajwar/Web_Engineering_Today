@@ -37,6 +37,7 @@ exports.register = async (req, res) => {
 
             const hashed = await bcrypt.hash(patient_password, 10);
 
+            // Omit `role`: DB default ('patient') applies; avoids "Unknown column 'role'" on older schemas.
             data = {
                 patient_name,
                 patient_email,
@@ -46,7 +47,6 @@ exports.register = async (req, res) => {
                 gender: gender || null,
                 blood_group: blood_group || null,
                 address: address || null,
-                role: 'patient'
             };
         } else if (role === 'doctor') {
             const {
@@ -75,7 +75,6 @@ exports.register = async (req, res) => {
                 qualification: qualification || null,
                 experience: typeof experience === 'number' ? experience : (experience ? parseInt(experience, 10) : null),
                 chamber_time: chamber_time || null,
-                role: 'doctor'
             };
         } else if (role === 'admin') {
             const {
@@ -96,7 +95,6 @@ exports.register = async (req, res) => {
                 admin_email,
                 admin_password: hashed,
                 admin_phone: admin_phone || null,
-                role: 'admin'
             };
         } else {
             return res.status(400).json({ message: 'Invalid role' });
@@ -104,11 +102,32 @@ exports.register = async (req, res) => {
 
         authModel.insertUser(table, data, (err) => {
             if (err) {
+                if (err.code === 'ER_DUP_ENTRY') {
+                    return res.status(409).json({
+                        message: 'This email is already registered. Try signing in instead.',
+                    });
+                }
+                if (err.code === 'ER_BAD_FIELD_ERROR') {
+                    return res.status(500).json({
+                        message: 'Registration failed',
+                        error:
+                            err.sqlMessage ||
+                            'A column in the request does not exist in your database. Compare your Railway tables with New folder/database.sql.',
+                    });
+                }
+                if (err.code === 'ER_DATA_TOO_LONG') {
+                    return res.status(500).json({
+                        message: 'Registration failed',
+                        error:
+                            (err.sqlMessage || '') +
+                            ' Tip: bcrypt hashes need VARCHAR(255) or at least 60 for password columns.',
+                    });
+                }
                 const msg = err.sqlMessage || err.message || 'Database error';
                 return res.status(500).json({
                     message: 'Registration failed',
                     error: msg,
-                    code: err.code
+                    code: err.code,
                 });
             }
             res.json({ message: 'Registered Successfully' });

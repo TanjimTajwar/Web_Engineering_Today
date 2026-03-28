@@ -6,16 +6,17 @@ dotenv.config();
 
 const app = express();
 
-// Comma-separated list, e.g. https://webprojectjobra.netlify.app
-// If set but parses to an empty list, fall back to reflecting all (same as unset) to avoid locking out every origin.
-let corsOrigins = true;
+// CORS_ORIGIN: single URL or comma-separated (https only, no trailing slash). Required for production with credentials.
+// When unset, origin reflects the request (fine for local dev only).
+let corsOriginOption = true;
 if (process.env.CORS_ORIGIN) {
     const list = process.env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean);
-    corsOrigins = list.length ? list : true;
+    corsOriginOption = list.length > 1 ? list : list.length === 1 ? list[0] : true;
 }
 app.use(
     cors({
-        origin: corsOrigins,
+        origin: corsOriginOption,
+        credentials: true,
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
     })
@@ -49,6 +50,8 @@ app.use('/api/appointment', appointmentRoutes);
 app.use('/api/report', reportRoutes);
 app.use('/api/complaint', complaintRoutes);
 
+// Railway sets PORT (e.g. 8080). Never hardcode app.listen(5000).
+// 0.0.0.0 lets Railway’s proxy reach the container (PORT still comes from env).
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
