@@ -7,14 +7,18 @@ const API = axios.create({
 });
 
 // attach token automatically
-API.interceptors.request.use(req => {
-
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    if (user?.token) {
-        req.headers.Authorization = user.token;
+API.interceptors.request.use((req) => {
+    try {
+        const raw = localStorage.getItem('user');
+        if (raw) {
+            const user = JSON.parse(raw);
+            if (user?.token) {
+                req.headers.Authorization = user.token;
+            }
+        }
+    } catch {
+        // ignore corrupt or invalid stored user
     }
-
     return req;
 });
 

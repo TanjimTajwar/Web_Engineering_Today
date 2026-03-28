@@ -91,7 +91,18 @@ export default function Register() {
       setSuccess('Account created successfully. Redirecting to login…');
       setTimeout(() => navigate('/'), 1500);
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      const msg = err.response?.data?.message;
+      const code = err.code;
+      const isNetwork =
+        code === 'ERR_NETWORK' ||
+        err.message === 'Network Error' ||
+        !err.response;
+      setError(
+        msg ||
+          (isNetwork
+            ? 'Cannot reach the server. Start the backend (from the project root run npm run start:backend, or npm start for frontend and backend together).'
+            : 'Registration failed')
+      );
     } finally {
       setLoading(false);
     }
