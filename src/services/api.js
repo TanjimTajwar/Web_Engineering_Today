@@ -1,9 +1,30 @@
 import axios from 'axios';
 
+/**
+ * Netlify / local API base. Prefer REACT_APP_API_URL (full base, e.g. https://host/api).
+ * Or REACT_APP_BACKEND_URL: host or full URL; https is added if missing, /api is appended if missing.
+ */
+function resolveApiBaseUrl() {
+    const fromApiUrl = process.env.REACT_APP_API_URL?.trim().replace(/\/$/, '');
+    if (fromApiUrl) return fromApiUrl;
+
+    const fromBackend = process.env.REACT_APP_BACKEND_URL?.trim();
+    if (fromBackend) {
+        let base = fromBackend.replace(/\/$/, '');
+        if (!/^https?:\/\//i.test(base)) {
+            base = `https://${base}`;
+        }
+        if (!/\/api$/i.test(base)) {
+            base = `${base}/api`;
+        }
+        return base;
+    }
+
+    return 'http://localhost:5000/api';
+}
+
 const API = axios.create({
-    baseURL:
-        process.env.REACT_APP_API_URL?.replace(/\/$/, '') ||
-        'http://localhost:5000/api',
+    baseURL: resolveApiBaseUrl(),
 });
 
 // attach token automatically

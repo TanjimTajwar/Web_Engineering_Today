@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerPatient, registerDoctor, registerAdmin } from '../services/authService';
+import { getNetworkErrorHint, isLikelyNetworkError } from '../utils/apiErrors';
 import logo from '../bg_images/Jobra_hospital_logo.png';
 import '../styles/auth.css';
 
@@ -92,16 +93,9 @@ export default function Register() {
       setTimeout(() => navigate('/'), 1500);
     } catch (err) {
       const msg = err.response?.data?.message;
-      const code = err.code;
-      const isNetwork =
-        code === 'ERR_NETWORK' ||
-        err.message === 'Network Error' ||
-        !err.response;
       setError(
         msg ||
-          (isNetwork
-            ? 'Cannot reach the server. Start the backend (from the project root run npm run start:backend, or npm start for frontend and backend together).'
-            : 'Registration failed')
+          (isLikelyNetworkError(err) ? getNetworkErrorHint() : 'Registration failed')
       );
     } finally {
       setLoading(false);

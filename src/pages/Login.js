@@ -2,6 +2,7 @@ import { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { loginUser } from '../services/authService';
+import { getNetworkErrorHint, isLikelyNetworkError } from '../utils/apiErrors';
 import logo from '../bg_images/Jobra_hospital_logo.png';
 import loginDoctor from '../bg_images/login_doctor.png';
 import '../styles/auth.css';
@@ -43,7 +44,10 @@ export default function Login() {
       else if (data.role === 'patient') navigate('/patient');
       else navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(
+        err.response?.data?.message ||
+          (isLikelyNetworkError(err) ? getNetworkErrorHint() : 'Login failed')
+      );
     } finally {
       setLoading(false);
     }
